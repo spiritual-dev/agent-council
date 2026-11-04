@@ -1,0 +1,208 @@
+{
+  "meta": {
+    "id": "solo-founder-demo",
+    "version": "1.0.0",
+    "updated": "2026-11-04T11:25:16-08:00",
+    "timezone": "America/Los_Angeles",
+    "quiet_hours": "21:00-07:00",
+    "rest_days": [
+      "Sunday"
+    ]
+  },
+  "chairman": {
+    "display_name": "Alex",
+    "role_title": "Founder"
+  },
+  "vision": "Ship a useful product without burning out, and keep personal health as a first-class system.",
+  "values": [
+    "Clarity over theater",
+    "Ship small weekly",
+    "Health is infrastructure"
+  ],
+  "master": {
+    "id": "master",
+    "name": "Jarvis",
+    "purpose": "Only interface to Alex; reports up and carries decisions down",
+    "outcomes": [
+      "One clear weekly briefing",
+      "No surprise sends"
+    ],
+    "permission_tier": "act_with_approval"
+  },
+  "council": [
+    {
+      "id": "council-brief",
+      "name": "Decision Brief",
+      "purpose": "Turn options into one-question packets",
+      "outcomes": [
+        "Chairman never gets more than one question at a time"
+      ]
+    },
+    {
+      "id": "council-red",
+      "name": "Red Team",
+      "purpose": "Attack weak premises before work scales",
+      "outcomes": [
+        "Named risks on every major proposal"
+      ]
+    }
+  ],
+  "teams": [
+    {
+      "id": "team-work",
+      "name": "Product",
+      "domain": "work or company",
+      "purpose": "Ship the product roadmap",
+      "lead": "seat-pm",
+      "seats": [
+        {
+          "id": "seat-pm",
+          "name": "Product Lead",
+          "purpose": "Own roadmap outcomes",
+          "outcomes": [
+            "Weekly shipped increment"
+          ],
+          "duties": [
+            "Prioritize",
+            "Write briefs",
+            "Gate releases"
+          ],
+          "reports_to": "master",
+          "skills": [
+            "skill-weekly-ship"
+          ],
+          "permission_tier": "draft"
+        },
+        {
+          "id": "seat-eng",
+          "name": "Builder",
+          "purpose": "Implement product work",
+          "outcomes": [
+            "Merged work matching brief"
+          ],
+          "duties": [
+            "Code",
+            "Tests",
+            "Notes for review"
+          ],
+          "reports_to": "seat-pm",
+          "skills": [],
+          "permission_tier": "draft"
+        },
+        {
+          "id": "seat-review",
+          "name": "Independent Reviewer",
+          "purpose": "Score builds without having written them",
+          "outcomes": [
+            "PASS/FAIL with evidence"
+          ],
+          "duties": [
+            "Rubric review",
+            "Fix list"
+          ],
+          "reports_to": "seat-pm",
+          "skills": [
+            "skill-review-gate"
+          ],
+          "permission_tier": "read"
+        }
+      ]
+    },
+    {
+      "id": "team-money",
+      "name": "Money",
+      "domain": "money",
+      "purpose": "Keep runway and pricing clear",
+      "lead": "seat-money",
+      "seats": [
+        {
+          "id": "seat-money",
+          "name": "Money Lead",
+          "purpose": "Cash and pricing clarity",
+          "outcomes": [
+            "Monthly runway snapshot"
+          ],
+          "duties": [
+            "Track burn",
+            "Draft pricing options"
+          ],
+          "reports_to": "master",
+          "skills": [],
+          "permission_tier": "draft"
+        }
+      ]
+    },
+    {
+      "id": "team-health",
+      "name": "Health",
+      "domain": "health and body",
+      "purpose": "Protect sleep, training, and recovery",
+      "lead": "seat-health",
+      "seats": [
+        {
+          "id": "seat-health",
+          "name": "Health Lead",
+          "purpose": "Weekly body plan",
+          "outcomes": [
+            "Plan Alex actually follows"
+          ],
+          "duties": [
+            "Schedule training windows",
+            "Flag conflicts with deep work"
+          ],
+          "reports_to": "master",
+          "skills": [],
+          "permission_tier": "draft"
+        }
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "skill-weekly-ship",
+      "name": "weekly-ship",
+      "owner": "seat-pm",
+      "version": "1.0.0",
+      "status": "active",
+      "notes": "Friday ship checklist"
+    },
+    {
+      "id": "skill-review-gate",
+      "name": "review-gate",
+      "owner": "seat-review",
+      "version": "0.2.0",
+      "status": "reviewed",
+      "notes": "Independent review checklist"
+    },
+    {
+      "id": "skill-investor-update",
+      "name": "investor-update",
+      "owner": "seat-money",
+      "version": "0.1.0",
+      "status": "draft",
+      "notes": "Not active until reviewed"
+    }
+  ],
+  "decisions": [
+    {
+      "at": "2026-11-01T09:00:00-08:00",
+      "summary": "Start with Product, Money, Health only",
+      "by": "Alex",
+      "effect": "Three teams created"
+    },
+    {
+      "at": "2026-11-03T16:00:00-08:00",
+      "summary": "No social posting without explicit yes",
+      "by": "Alex",
+      "effect": "Permission tier locked to act_with_approval"
+    }
+  ],
+  "blockers": [
+    {
+      "id": "b1",
+      "summary": "Need bank export format for runway snapshot",
+      "owner": "seat-money",
+      "since": "2026-11-02"
+    }
+  ]
+}

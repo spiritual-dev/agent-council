@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agent Council</title>
+<style>
+:root {
+  --bg: #f6f5f2;
+  --surface: #ffffff;
+  --ink: #1c1c1c;
+  --muted: #6b6b6b;
+  --line: #e6e3dc;
+  --accent: #2f6fed;
+  --accent-soft: #e8effc;
+  --good: #1f8a4c;
+  --warn: #b7791f;
+  --bad: #b42318;
+  --shadow: 0 10px 30px rgba(28,28,28,.06);
+  --radius: 16px;
+  --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); }
+body { min-height: 100vh; }
+a { color: var(--accent); }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 80px; }
+header.top { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: end; margin-bottom: 24px; }
+h1 { font-size: 28px; letter-spacing: -0.03em; margin: 0 0 6px; }
+.sub { color: var(--muted); font-size: 14px; line-height: 1.45; max-width: 62ch; }
+.meta { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.grid { display: grid; grid-template-columns: 1.4fr .9fr; gap: 18px; }
+@media (max-width: 920px) { .grid { grid-template-columns: 1fr; } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+.card h2 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
+.node {
+  border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; background: #fff;
+  cursor: pointer; transition: border-color .15s, transform .15s, box-shadow .15s;
+}
+.node:hover, .node.active { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.node .label { font-weight: 700; font-size: 15px; }
+.node .purpose { color: var(--muted); font-size: 13px; margin-top: 4px; line-height: 1.35; }
+.stack { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+.flow { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.arrow { color: var(--muted); font-size: 18px; line-height: 1; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.team-block { border: 1px dashed var(--line); border-radius: 14px; padding: 12px; background: #fafaf8; }
+.team-block h3 { margin: 0 0 10px; font-size: 13px; }
+.seats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 600; background: var(--accent-soft); color: var(--accent); }
+.pill.neutral { background: #eee; color: #444; }
+.pill.draft { background: #f3e8c8; color: #8a5a00; }
+.pill.reviewed { background: #e4eefc; color: #1d4f91; }
+.pill.active { background: #d9f2e4; color: #146c3b; }
+.pill.retired, .pill.noticed { background: #eee; color: #666; }
+.detail { position: sticky; top: 16px; }
+.detail dl { margin: 0; display: grid; grid-template-columns: 96px 1fr; gap: 8px 10px; font-size: 14px; }
+.detail dt { color: var(--muted); }
+.detail dd { margin: 0; }
+.list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.list li { border-top: 1px solid var(--line); padding-top: 8px; font-size: 13px; line-height: 1.4; }
+.list li:first-child { border-top: 0; padding-top: 0; }
+.values { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.muted { color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+.err { background: #fff1f0; border: 1px solid #f0c2be; color: #8a1f18; padding: 12px 14px; border-radius: 12px; margin-bottom: 16px; }
+footer { margin-top: 22px; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="error" class="err" hidden></div>
+  <header class="top">
+    <div>
+      <h1 id="title">Agent Council</h1>
+      <div class="sub" id="vision"></div>
+      <div class="values" id="values"></div>
+    </div>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Org map</h2>
+      <div class="flow" id="map"></div>
+      <div class="legend">Click any seat for details. Arrows show reporting up / direction down.</div>
+    </section>
+
+    <aside class="card detail" id="detail">
+      <h2>Seat detail</h2>
+      <p class="muted" id="detail-empty">Select a seat on the map.</p>
+      <div id="detail-body" hidden>
+        <div class="label" id="d-name" style="font-size:18px;font-weight:700;margin-bottom:8px"></div>
+        <dl>
+          <dt>Purpose</dt><dd id="d-purpose"></dd>
+          <dt>Reports to</dt><dd id="d-reports"></dd>
+          <dt>Outcomes</dt><dd id="d-outcomes"></dd>
+          <dt>Duties</dt><dd id="d-duties"></dd>
+          <dt>Skills</dt><dd id="d-skills"></dd>
+          <dt>Tier</dt><dd id="d-tier"></dd>
+        </dl>
+      </div>
+    </aside>
+
+    <section class="card">
+      <h2>Skills lifecycle</h2>
+      <ul class="list" id="skills"></ul>
+    </section>
+
+    <section class="card">
+      <h2>Feedback loop</h2>
+      <p style="margin:0 0 10px;font-size:14px;line-height:1.45">Direction flows down as vision and briefs. Status, blockers, and decisions needed flow up. Independent review sits between builder and the Chairman.</p>
+      <div class="row" style="justify-content:flex-start">
+        <span class="pill">Vision → briefs</span>
+        <span class="pill neutral">Builder → reviewer</span>
+        <span class="pill">Reports → decision brief</span>
+        <span class="pill neutral">Chairman yes/no</span>
+      </div>
+      <h2 style="margin-top:18px">Open blockers</h2>
+      <ul class="list" id="blockers"></ul>
+    </section>
+
+    <section class="card" style="grid-column: 1 / -1">
+      <h2>Recent decisions and changelog</h2>
+      <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 16px">
+        <ul class="list" id="decisions"></ul>
+        <ul class="list" id="changelog"></ul>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    agent-council interface · open via <code>python3 -m http.server</code> or as a local file (embedded data). Theme tokens live in <code>:root</code>.
+  </footer>
+</div>
+
+<script>
+/* __ORG_EMBED_START__ */
+window.__ORG__ = {
+  "meta": {
+    "id": "nurse-side-project-demo",
+    "version": "1.0.0",
+    "updated": "2026-11-04T11:25:15-08:00",
+    "timezone": "America/Chicago",
+    "quiet_hours": "22:00-06:00 local; no pings on shift",
+    "rest_days": [
+      "first day off after night shift"
+    ]
+  },
+  "chairman": {
+    "display_name": "Jordan",
+    "role_title": "Nurse + side project maker"
+  },
+  "vision": "Do excellent clinical work on shift, and slowly grow a small teaching project without guilt.",
+  "values": [
+    "Patients first on shift days",
+    "Tiny creative steps beat big plans",
+    "Rest is scheduled"
+  ],
+  "master": {
+    "id": "master",
+    "name": "Main Bot",
+    "purpose": "Only interface to Jordan; protect off-hours",
+    "outcomes": [
+      "Shift-aware quiet mode",
+      "Weekend creative briefing"
+    ],
+    "permission_tier": "act_with_approval"
+  },
+  "council": [
+    {
+      "id": "council-brief",
+      "name": "Decision Brief",
+      "purpose": "Batch asks for days off",
+      "outcomes": [
+        "One weekly decision packet"
+      ]
+    },
+    {
+      "id": "council-red",
+      "name": "Red Team",
+      "purpose": "Stop overcommitment on recovery days",
+      "outcomes": [
+        "Flag when creative work collides with rest"
+      ]
+    }
+  ],
+  "teams": [
+    {
+      "id": "team-work",
+      "name": "Job",
+      "domain": "work or company",
+      "purpose": "Support the nursing job without touching clinical systems agents should not open",
+      "lead": "seat-job",
+      "seats": [
+        {
+          "id": "seat-job",
+          "name": "Job Admin",
+          "purpose": "Schedule and non-clinical admin help",
+          "outcomes": [
+            "Shift calendar clarity"
+          ],
+          "duties": [
+            "Track shifts Jordan pastes in",
+            "Remind CE deadlines"
+          ],
+          "reports_to": "master",
+          "skills": [
+            "skill-shift-quiet"
+          ],
+          "permission_tier": "draft"
+        }
+      ]
+    },
+    {
+      "id": "team-creative",
+      "name": "Side Project",
+      "domain": "creative projects",
+      "purpose": "Grow the teaching project in small slices",
+      "lead": "seat-creative",
+      "seats": [
+        {
+          "id": "seat-creative",
+          "name": "Creative Lead",
+          "purpose": "Own the teaching project roadmap",
+          "outcomes": [
+            "One published note every two weeks"
+          ],
+          "duties": [
+            "Outline",
+            "Draft",
+            "Ask for review"
+          ],
+          "reports_to": "master",
+          "skills": [
+            "skill-tiny-publish"
+          ],
+          "permission_tier": "draft"
+        },
+        {
+          "id": "seat-editor",
+          "name": "Editor",
+          "purpose": "Independent pass on drafts",
+          "outcomes": [
+            "Clear PASS/FIX notes"
+          ],
+          "duties": [
+            "Review tone and clarity"
+          ],
+          "reports_to": "seat-creative",
+          "skills": [],
+          "permission_tier": "read"
+        }
+      ]
+    },
+    {
+      "id": "team-home",
+      "name": "Home",
+      "domain": "home and admin",
+      "purpose": "Keep life logistics light",
+      "lead": "seat-home",
+      "seats": [
+        {
+          "id": "seat-home",
+          "name": "Home Admin",
+          "purpose": "Bills, errands list, appointments",
+          "outcomes": [
+            "Weekly logistics list"
+          ],
+          "duties": [
+            "Draft lists",
+            "Never pay without yes"
+          ],
+          "reports_to": "master",
+          "skills": [],
+          "permission_tier": "draft"
+        }
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "skill-shift-quiet",
+      "name": "shift-quiet-mode",
+      "owner": "seat-job",
+      "version": "1.1.0",
+      "status": "active",
+      "notes": "No proactive pings during pasted shift windows"
+    },
+    {
+      "id": "skill-tiny-publish",
+      "name": "tiny-publish",
+      "owner": "seat-creative",
+      "version": "0.3.0",
+      "status": "reviewed",
+      "notes": "Two-week note checklist"
+    },
+    {
+      "id": "skill-meal-prep",
+      "name": "meal-prep",
+      "owner": "seat-home",
+      "version": "0.1.0",
+      "status": "noticed",
+      "notes": "Not drafted yet"
+    }
+  ],
+  "decisions": [
+    {
+      "at": "2026-10-20T12:00:00-05:00",
+      "summary": "No agent access to clinical charts or patient data",
+      "by": "Jordan",
+      "effect": "Job team limited to schedule/admin Jordan pastes"
+    },
+    {
+      "at": "2026-11-01T18:00:00-05:00",
+      "summary": "Publish cadence is every two weeks, not weekly",
+      "by": "Jordan",
+      "effect": "Creative DoD updated"
+    }
+  ],
+  "blockers": []
+};
+window.__CHANGELOG__ = [
+  {
+    "at": "2026-11-04T11:25:15-08:00",
+    "version": "1.0.0",
+    "message": "Initial nurse side-project example",
+    "org_id": "nurse-side-project-demo"
+  }
+];
+/* __ORG_EMBED_END__ */
+</script>
+<script>
+(function () {
+  const errEl = document.getElementById('error');
+  const byId = {};
+
+  function showError(msg) {
+    errEl.hidden = false;
+    errEl.textContent = msg;
+  }
+
+  function pillFor(status) {
+    return '<span class="pill ' + status + '">' + status + '</span>';
+  }
+
+  function indexOrg(org) {
+    byId.master = { ...org.master, reports_to: 'chairman', kind: 'master' };
+    (org.council || []).forEach(s => { byId[s.id] = { ...s, reports_to: 'master', kind: 'council' }; });
+    (org.teams || []).forEach(t => {
+      (t.seats || []).forEach(s => { byId[s.id] = { ...s, kind: 'seat', team: t.name, domain: t.domain }; });
+    });
+    byId.chairman = { id: 'chairman', name: org.chairman.display_name, purpose: 'Chairman', reports_to: null, kind: 'chairman', outcomes: [org.chairman.role_title || 'Person'] };
+  }
+
+  function nodeHtml(id, title, purpose, extraClass) {
+    return '<div class="node ' + (extraClass || '') + '" data-id="' + id + '"><div class="label">' + title + '</div><div class="purpose">' + (purpose || '') + '</div></div>';
+  }
+
+  function renderMap(org) {
+    const map = document.getElementById('map');
+    let html = '';
+    html += nodeHtml('chairman', 'Chairman · ' + org.chairman.display_name, org.chairman.role_title || 'Person');
+    html += '<div class="arrow">↓ reports / ↑ decisions</div>';
+    html += nodeHtml('master', 'Master · ' + org.master.name, org.master.purpose);
+    html += '<div class="arrow">↓</div>';
+    html += '<div class="row">';
+    (org.council || []).forEach(c => { html += nodeHtml(c.id, c.name, c.purpose); });
+    html += '</div>';
+    html += '<div class="arrow">↓ teams</div>';
+    html += '<div class="stack" style="width:100%">';
+    (org.teams || []).forEach(t => {
+      html += '<div class="team-block"><h3>' + t.name + ' <span class="muted">· ' + t.domain + '</span></h3><div class="seats">';
+      (t.seats || []).forEach(s => { html += nodeHtml(s.id, s.name, s.purpose); });
+      html += '</div></div>';
+    });
+    html += '</div>';
+    map.innerHTML = html;
+    map.querySelectorAll('.node').forEach(el => {
+      el.addEventListener('click', () => select(el.getAttribute('data-id')));
+    });
+  }
+
+  function select(id) {
+    document.querySelectorAll('.node').forEach(n => n.classList.toggle('active', n.getAttribute('data-id') === id));
+    const s = byId[id];
+    const empty = document.getElementById('detail-empty');
+    const body = document.getElementById('detail-body');
+    if (!s) { empty.hidden = false; body.hidden = true; return; }
+    empty.hidden = true; body.hidden = false;
+    document.getElementById('d-name').textContent = s.name + (s.team ? ' · ' + s.team : '');
+    document.getElementById('d-purpose').textContent = s.purpose || '-';
+    document.getElementById('d-reports').textContent = s.reports_to || (s.kind === 'chairman' ? '-' : 'master');
+    document.getElementById('d-outcomes').textContent = (s.outcomes || []).join('; ') || '-';
+    document.getElementById('d-duties').textContent = (s.duties || []).join('; ') || '-';
+    const skillNames = (s.skills || []).map(sid => {
+      const sk = (window.__ORG__.skills || []).find(x => x.id === sid);
+      return sk ? sk.name + ' (' + sk.status + ')' : sid;
+    });
+    document.getElementById('d-skills').textContent = skillNames.join(', ') || '-';
+    document.getElementById('d-tier').textContent = s.permission_tier || '-';
+  }
+
+  function renderLists(org, changelog) {
+    const skills = document.getElementById('skills');
+    skills.innerHTML = (org.skills || []).map(s => (
+      '<li><strong>' + s.name + '</strong> ' + pillFor(s.status) +
+      '<div class="muted">v' + s.version + ' · owner ' + s.owner + (s.notes ? ' · ' + s.notes : '') + '</div></li>'
+    )).join('') || '<li class="muted">No skills yet.</li>';
+
+    const blockers = document.getElementById('blockers');
+    blockers.innerHTML = (org.blockers || []).map(b => (
+      '<li><strong>' + b.summary + '</strong><div class="muted">owner ' + b.owner + (b.since ? ' · since ' + b.since : '') + '</div></li>'
+    )).join('') || '<li class="muted">No open blockers.</li>';
+
+    const decisions = document.getElementById('decisions');
+    decisions.innerHTML = '<li class="muted"><strong>Decisions</strong></li>' + ((org.decisions || []).slice().reverse().map(d => (
+      '<li><strong>' + d.summary + '</strong><div class="muted">' + d.at + ' · ' + d.by + (d.effect ? ' · ' + d.effect : '') + '</div></li>'
+    )).join('') || '<li class="muted">None yet.</li>');
+
+    const clog = document.getElementById('changelog');
+    clog.innerHTML = '<li class="muted"><strong>Changelog</strong></li>' + ((changelog || []).slice().reverse().map(c => (
+      '<li><strong>' + (c.message || 'update') + '</strong><div class="muted">' + (c.at || '') + ' · v' + (c.version || '') + '</div></li>'
+    )).join('') || '<li class="muted">Run scripts/update_org.py to start history.</li>');
+  }
+
+  function paint(org, changelog) {
+    indexOrg(org);
+    document.getElementById('title').textContent = org.chairman.display_name + "'s Agent Council";
+    document.getElementById('vision').textContent = org.vision || '';
+    document.getElementById('values').innerHTML = (org.values || []).map(v => '<span class="pill neutral">' + v + '</span>').join('');
+    document.getElementById('meta').innerHTML =
+      'v' + org.meta.version + '<br>updated ' + org.meta.updated +
+      (org.meta.quiet_hours ? '<br>quiet ' + org.meta.quiet_hours : '') +
+      (org.meta.rest_days && org.meta.rest_days.length ? '<br>rest ' + org.meta.rest_days.join(', ') : '');
+    renderMap(org);
+    renderLists(org, changelog || []);
+    select('master');
+  }
+
+  async function load() {
+    const params = new URLSearchParams(location.search);
+    const orgPath = params.get('org');
+    let org = window.__ORG__;
+    let changelog = window.__CHANGELOG__ || [];
+    if (orgPath || !org) {
+      try {
+        const path = orgPath || '../org.json';
+        const res = await fetch(path, { cache: 'no-store' });
+        if (res.ok) org = await res.json();
+        try {
+          const cRes = await fetch(orgPath ? orgPath.replace(/[^/]+$/, 'changelog.json') : '../interface/changelog.json', { cache: 'no-store' });
+          if (cRes.ok) changelog = await cRes.json();
+        } catch (_) {}
+      } catch (e) {
+        if (!org) showError('Could not load org JSON over file://. Open via a local server, or run scripts/update_org.py to embed data.');
+      }
+    }
+    if (!org) {
+      showError('No org data loaded. Pass ?org=... on a local server or embed with scripts/update_org.py.');
+      return;
+    }
+    window.__ORG__ = org;
+    paint(org, changelog);
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>

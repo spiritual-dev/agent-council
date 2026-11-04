@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/agent-council/org.schema.json",
+  "title": "Agent Council Org",
+  "type": "object",
+  "required": ["meta", "chairman", "vision", "values", "master", "council", "teams", "skills", "decisions", "blockers"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["id", "version", "updated"],
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "type": "string" },
+        "updated": { "type": "string" },
+        "timezone": { "type": "string" },
+        "quiet_hours": { "type": "string" },
+        "rest_days": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "chairman": {
+      "type": "object",
+      "required": ["display_name"],
+      "properties": {
+        "display_name": { "type": "string" },
+        "role_title": { "type": "string" }
+      }
+    },
+    "vision": { "type": "string" },
+    "values": { "type": "array", "items": { "type": "string" } },
+    "master": {
+      "type": "object",
+      "required": ["id", "name", "purpose"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "purpose": { "type": "string" },
+        "outcomes": { "type": "array", "items": { "type": "string" } },
+        "permission_tier": { "type": "string" }
+      }
+    },
+    "council": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "purpose"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "purpose": { "type": "string" },
+          "outcomes": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "teams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "domain", "lead", "seats"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "domain": { "type": "string" },
+          "purpose": { "type": "string" },
+          "lead": { "type": "string" },
+          "seats": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "name", "purpose", "reports_to"],
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "purpose": { "type": "string" },
+                "outcomes": { "type": "array", "items": { "type": "string" } },
+                "duties": { "type": "array", "items": { "type": "string" } },
+                "reports_to": { "type": "string" },
+                "skills": { "type": "array", "items": { "type": "string" } },
+                "permission_tier": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "owner", "version", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "owner": { "type": "string" },
+          "version": { "type": "string" },
+          "status": { "type": "string", "enum": ["noticed", "draft", "reviewed", "active", "retired"] },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["at", "summary", "by"],
+        "properties": {
+          "at": { "type": "string" },
+          "summary": { "type": "string" },
+          "by": { "type": "string" },
+          "effect": { "type": "string" }
+        }
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "summary", "owner"],
+        "properties": {
+          "id": { "type": "string" },
+          "summary": { "type": "string" },
+          "owner": { "type": "string" },
+          "since": { "type": "string" }
+        }
+      }
+    }
+  }
+}
