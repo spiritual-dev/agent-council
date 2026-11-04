@@ -1,0 +1,184 @@
+{
+  "meta": {
+    "id": "nurse-side-project-demo",
+    "version": "1.0.0",
+    "updated": "2026-11-04T11:25:15-08:00",
+    "timezone": "America/Chicago",
+    "quiet_hours": "22:00-06:00 local; no pings on shift",
+    "rest_days": [
+      "first day off after night shift"
+    ]
+  },
+  "chairman": {
+    "display_name": "Jordan",
+    "role_title": "Nurse + side project maker"
+  },
+  "vision": "Do excellent clinical work on shift, and slowly grow a small teaching project without guilt.",
+  "values": [
+    "Patients first on shift days",
+    "Tiny creative steps beat big plans",
+    "Rest is scheduled"
+  ],
+  "master": {
+    "id": "master",
+    "name": "Main Bot",
+    "purpose": "Only interface to Jordan; protect off-hours",
+    "outcomes": [
+      "Shift-aware quiet mode",
+      "Weekend creative briefing"
+    ],
+    "permission_tier": "act_with_approval"
+  },
+  "council": [
+    {
+      "id": "council-brief",
+      "name": "Decision Brief",
+      "purpose": "Batch asks for days off",
+      "outcomes": [
+        "One weekly decision packet"
+      ]
+    },
+    {
+      "id": "council-red",
+      "name": "Red Team",
+      "purpose": "Stop overcommitment on recovery days",
+      "outcomes": [
+        "Flag when creative work collides with rest"
+      ]
+    }
+  ],
+  "teams": [
+    {
+      "id": "team-work",
+      "name": "Job",
+      "domain": "work or company",
+      "purpose": "Support the nursing job without touching clinical systems agents should not open",
+      "lead": "seat-job",
+      "seats": [
+        {
+          "id": "seat-job",
+          "name": "Job Admin",
+          "purpose": "Schedule and non-clinical admin help",
+          "outcomes": [
+            "Shift calendar clarity"
+          ],
+          "duties": [
+            "Track shifts Jordan pastes in",
+            "Remind CE deadlines"
+          ],
+          "reports_to": "master",
+          "skills": [
+            "skill-shift-quiet"
+          ],
+          "permission_tier": "draft"
+        }
+      ]
+    },
+    {
+      "id": "team-creative",
+      "name": "Side Project",
+      "domain": "creative projects",
+      "purpose": "Grow the teaching project in small slices",
+      "lead": "seat-creative",
+      "seats": [
+        {
+          "id": "seat-creative",
+          "name": "Creative Lead",
+          "purpose": "Own the teaching project roadmap",
+          "outcomes": [
+            "One published note every two weeks"
+          ],
+          "duties": [
+            "Outline",
+            "Draft",
+            "Ask for review"
+          ],
+          "reports_to": "master",
+          "skills": [
+            "skill-tiny-publish"
+          ],
+          "permission_tier": "draft"
+        },
+        {
+          "id": "seat-editor",
+          "name": "Editor",
+          "purpose": "Independent pass on drafts",
+          "outcomes": [
+            "Clear PASS/FIX notes"
+          ],
+          "duties": [
+            "Review tone and clarity"
+          ],
+          "reports_to": "seat-creative",
+          "skills": [],
+          "permission_tier": "read"
+        }
+      ]
+    },
+    {
+      "id": "team-home",
+      "name": "Home",
+      "domain": "home and admin",
+      "purpose": "Keep life logistics light",
+      "lead": "seat-home",
+      "seats": [
+        {
+          "id": "seat-home",
+          "name": "Home Admin",
+          "purpose": "Bills, errands list, appointments",
+          "outcomes": [
+            "Weekly logistics list"
+          ],
+          "duties": [
+            "Draft lists",
+            "Never pay without yes"
+          ],
+          "reports_to": "master",
+          "skills": [],
+          "permission_tier": "draft"
+        }
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "skill-shift-quiet",
+      "name": "shift-quiet-mode",
+      "owner": "seat-job",
+      "version": "1.1.0",
+      "status": "active",
+      "notes": "No proactive pings during pasted shift windows"
+    },
+    {
+      "id": "skill-tiny-publish",
+      "name": "tiny-publish",
+      "owner": "seat-creative",
+      "version": "0.3.0",
+      "status": "reviewed",
+      "notes": "Two-week note checklist"
+    },
+    {
+      "id": "skill-meal-prep",
+      "name": "meal-prep",
+      "owner": "seat-home",
+      "version": "0.1.0",
+      "status": "noticed",
+      "notes": "Not drafted yet"
+    }
+  ],
+  "decisions": [
+    {
+      "at": "2026-10-20T12:00:00-05:00",
+      "summary": "No agent access to clinical charts or patient data",
+      "by": "Jordan",
+      "effect": "Job team limited to schedule/admin Jordan pastes"
+    },
+    {
+      "at": "2026-11-01T18:00:00-05:00",
+      "summary": "Publish cadence is every two weeks, not weekly",
+      "by": "Jordan",
+      "effect": "Creative DoD updated"
+    }
+  ],
+  "blockers": []
+}
